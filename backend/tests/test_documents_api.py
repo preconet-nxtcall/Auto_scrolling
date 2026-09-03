@@ -163,3 +163,49 @@ def test_get_document_pdf_stream():
     assert pdf_res.headers["content-type"] == "application/pdf"
     assert pdf_res.content.startswith(b"%PDF-")
 
+
+def test_document_settings_update():
+    png_bytes = create_sample_png_bytes()
+    files = [("files", ("update_test.png", png_bytes, "image/png"))]
+    upload_res = client.post(
+        "/api/documents/upload",
+        files=files,
+        headers={"X-User-Id": "1"}
+    )
+    assert upload_res.status_code == 201
+    doc_id = upload_res.json()[0]["id"]
+
+    # PATCH document settings override
+    patch_res = client.patch(
+        f"/api/documents/{doc_id}",
+        json={
+            "title": "Custom Document Title",
+            "scroll_speed": 75,
+            "repeat_count": 5,
+            "interaction_pause": 4000,
+            "start_delay": 1500
+        },
+        headers={"X-User-Id": "1"}
+    )
+    assert patch_res.status_code == 200
+    updated_doc = patch_res.json()
+    assert updated_doc["title"] == "Custom Document Title"
+    assert updated_doc["scroll_speed"] == 75
+    assert updated_doc["repeat_count"] == 5
+    assert updated_doc["interaction_pause"] == 4000
+    assert updated_doc["start_delay"] == 1500
+    assert updated_doc["effective_settings"]["scroll_speed"] == 75
+    assert updated_doc["effective_settings"]["repeat_count"] == 5
+
+    # Also test /settings URL alias
+    patch_alias_res = client.patch(
+        f"/api/documents/{doc_id}/settings",
+        json={
+            "scroll_speed": 90
+        },
+        headers={"X-User-Id": "1"}
+    )
+    assert patch_alias_res.status_code == 200
+    assert patch_alias_res.json()["scroll_speed"] == 90
+
+
