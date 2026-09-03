@@ -28,7 +28,7 @@ class Settings:
     PORT: int = int(os.getenv("PORT", 8000))
     
     # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'autoscroll.db'}")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'backend' / 'storage' / 'autoscroll.db'}")
     
     # Storage Paths
     STORAGE_DIR: Path = BASE_DIR / "backend" / "storage"
