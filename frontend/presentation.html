@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentation Player - Auto-Scroll Pro</title>
+  <meta name="description"
+    content="Dedicated presentation player page for Auto-Scroll Pro. Smooth automatic PDF scrolling presentation with single-click playback.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap 5 CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.1.0">
+</head>
+
+<body class="presentation-page-body">
+
+  <div class="app-wrapper">
+    <!-- Navigation Header -->
+    <header class="app-header">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon"><i class="bi bi-play-btn-fill"></i></div>
+        <div>
+          <div class="brand-title">Auto-Scroll Pro</div>
+          <div class="brand-subtitle">Presentation Theater Mode</div>
+        </div>
+      </a>
+
+      <div class="d-flex align-items-center gap-3">
+        <a href="/" class="btn-outline-custom">
+          <i class="bi bi-grid-1x2-fill me-1"></i> Dashboard
+        </a>
+        <button type="button" class="btn-outline-custom" onclick="GlobalSettingsManager.openModal()">
+          <i class="bi bi-sliders text-indigo-400 me-1"></i> Global Settings
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="main-content d-flex flex-column align-items-center justify-content-center py-4">
+      
+      <!-- Central Presentation Theater Card -->
+      <div class="pres-theater-card">
+        <!-- Ambient Glowing Background Effect -->
+        <div class="pres-glow-backdrop"></div>
+
+        <div class="pres-card-content text-center">
+          <div class="pres-mode-badge mb-3">
+            <span class="pulse-ring"></span>
+            <i class="bi bi-display-fill me-1.5"></i> Auto-Scroll Presentation Player
+          </div>
+
+          <h1 class="pres-title mb-2">Automated Presentation Mode</h1>
+          <p class="pres-subtitle mb-4">
+            Sit back and present. Automatically scrolls through your uploaded document queue with smooth, configurable speeds and interaction-aware pause detection.
+          </p>
+
+          <!-- Primary Hero Action Play Button -->
+          <div class="my-4 d-flex justify-content-center">
+            <button type="button" class="btn-hero-play" id="mainPlayBtn" onclick="startPresentationPlay()">
+              <div class="btn-hero-play-icon">
+                <i class="bi bi-play-fill"></i>
+              </div>
+              <div class="text-start">
+                <div class="btn-hero-play-title">Play Presentation</div>
+                <div class="btn-hero-play-sub" id="presStatusNote">Select all documents by default</div>
+              </div>
+            </button>
+          </div>
+
+          <!-- KPI Stats Bar -->
+          <div class="row g-3 justify-content-center mb-4">
+            <div class="col-6 col-md-4">
+              <div class="pres-stat-box">
+                <div class="pres-stat-icon text-indigo-400"><i class="bi bi-files"></i></div>
+                <div>
+                  <div class="pres-stat-label">Queue Selection</div>
+                  <div class="pres-stat-value" id="presDocCount">0 Docs</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4">
+              <div class="pres-stat-box">
+                <div class="pres-stat-icon text-emerald-400"><i class="bi bi-layers-fill"></i></div>
+                <div>
+                  <div class="pres-stat-label">Total Pages</div>
+                  <div class="pres-stat-value" id="presPageCount">0 Pages</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4">
+              <div class="pres-stat-box">
+                <div class="pres-stat-icon text-amber-400"><i class="bi bi-clock-history"></i></div>
+                <div>
+                  <div class="pres-stat-label">Est. Duration</div>
+                  <div class="pres-stat-value" id="presEstDuration">0s</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Document Playlist Selection & Preview Bar -->
+          <div class="pres-queue-card text-start">
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-list-check text-indigo-400 fs-5"></i>
+                <h5 class="fw-bold text-white mb-0">Presentation Queue</h5>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-link text-xs text-indigo-300 text-decoration-none p-0 fw-semibold" onclick="toggleSelectAllPresDocs(true)">
+                  Select All
+                </button>
+                <span class="text-slate-600">|</span>
+                <button type="button" class="btn btn-link text-xs text-slate-400 text-decoration-none p-0 fw-semibold" onclick="toggleSelectAllPresDocs(false)">
+                  Deselect All
+                </button>
+              </div>
+            </div>
+
+            <!-- Queue Items List Container -->
+            <div id="presQueueContainer" class="pres-queue-list">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <!-- Empty State for Presentation Queue -->
+            <div id="presEmptyState" class="text-center py-4 d-none">
+              <i class="bi bi-file-earmark-arrow-up text-slate-500 fs-1 mb-2"></i>
+              <h6 class="text-slate-300 fw-bold">No ready documents in playlist</h6>
+              <p class="text-slate-400 text-xs mb-3">Upload PDF or Office files in the dashboard to begin presenting.</p>
+              <a href="/" class="btn-primary-custom py-1.5 px-3.5 text-xs">
+                <i class="bi bi-plus-lg me-1"></i> Go to Dashboard & Upload
+              </a>
+            </div>
+          </div>
+
+          <!-- Keyboard Shortcuts Hints -->
+          <div class="d-flex align-items-center justify-content-center gap-4 mt-4 flex-wrap text-slate-400 text-xs">
+            <div><kbd class="pres-kbd">ESC</kbd> Exit Fullscreen</div>
+            <div><kbd class="pres-kbd">Space</kbd> Pause/Resume</div>
+            <div><kbd class="pres-kbd">&larr;</kbd> <kbd class="pres-kbd">&rarr;</kbd> Prev / Next Doc</div>
+            <div><kbd class="pres-kbd">+</kbd> <kbd class="pres-kbd">-</kbd> Zoom In / Out</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Global Settings Modal -->
+  <div class="modal fade" id="globalSettingsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content" style="border-radius: var(--radius-lg);">
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title fw-bold text-slate-900">
+            <i class="bi bi-gear-fill text-indigo-600 me-2"></i>Global Default Auto-Scroll Settings
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-info py-2 px-3 text-xs mb-4">
+            <i class="bi bi-info-circle-fill me-1.5"></i>
+            These global settings serve as default parameters for all documents unless custom per-document overrides are specified.
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label text-xs fw-bold text-slate-700">1. Scroll Speed (px/sec)</label>
+              <input type="number" class="form-control" id="globalScrollSpeed" min="10" max="500" value="50">
+              <div class="form-text text-3xs text-slate-500">Range: 10 - 500 pixels/second. Default: 50</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-xs fw-bold text-slate-700">2. Repeat Count (cycles)</label>
+              <input type="number" class="form-control" id="globalRepeatCount" min="1" max="50" value="3">
+              <div class="form-text text-3xs text-slate-500">Range: 1 - 50 cycles. Default: 3</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-xs fw-bold text-slate-700">3. Interaction Pause Duration (seconds)</label>
+              <input type="number" class="form-control" id="globalInteractionPause" min="0.5" max="30" step="0.5" value="3">
+              <div class="form-text text-3xs text-slate-500">Inactivity pause after user mouse/touch. Default: 3 sec</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-xs fw-bold text-slate-700">4. Start Delay (seconds)</label>
+              <input type="number" class="form-control" id="globalStartDelay" min="0" max="10" step="0.5" value="2">
+              <div class="form-text text-3xs text-slate-500">Initial delay before scrolling begins. Default: 2 sec</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-xs fw-bold text-slate-700">5. Delay Between Repeat Cycles (seconds)</label>
+              <input type="number" class="form-control" id="globalBetweenRepeatsDelay" min="0" max="10" step="0.5" value="1">
+              <div class="form-text text-3xs text-slate-500">Pause at top between repeat cycles. Default: 1 sec</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-xs fw-bold text-slate-700">6. Delay Before Next Document (seconds)</label>
+              <input type="number" class="form-control" id="globalBetweenDocumentsDelay" min="0" max="10" step="0.5" value="2">
+              <div class="form-text text-3xs text-slate-500">Playlist delay before loading next document. Default: 2 sec</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-light btn-sm fw-bold" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn-primary-custom py-1.5 px-3.5 text-xs" onclick="GlobalSettingsManager.saveSettings()">
+            <i class="bi bi-check-lg me-1"></i> Save Global Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULLSCREEN PDF AUTO-VIEWER OVERLAY -->
+  <div id="viewerOverlay" class="d-none">
+    <!-- Header Bar -->
+    <div class="viewer-header" id="viewerHeader">
+      <div class="viewer-doc-info">
+        <div class="brand-icon shadow-sm" style="width:36px;height:36px;font-size:1rem;flex-shrink:0;background:linear-gradient(135deg, var(--c-primary-500), var(--c-primary-700));">
+          <i class="bi bi-file-earmark-pdf-fill"></i>
+        </div>
+        <div class="d-flex flex-column justify-content-center min-w-0">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="viewer-doc-title" id="viewerDocTitle" title="Document Title">Loading Document...</div>
+            <span class="viewer-pill viewer-pill-queue" id="viewerQueueProgressText">Doc 1 of 1</span>
+            <span class="viewer-pill viewer-pill-page" id="viewerPageProgressText">Page 1 of --</span>
+            <span class="viewer-pill viewer-pill-cycle" id="viewerCycleText">Cycle 1 of 3</span>
+            <span class="d-none" id="viewerDocSub"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="viewer-controls">
+        <div class="control-group-glass">
+          <button type="button" class="btn-player-icon" id="prevDocBtn" onclick="AutoViewerEngine.prevDocument()" title="Previous Document">
+            <i class="bi bi-skip-backward-fill"></i>
+          </button>
+          <button type="button" class="btn-player-icon" id="nextDocBtn" onclick="AutoViewerEngine.nextDocument()" title="Next Document">
+            <i class="bi bi-skip-forward-fill"></i>
+          </button>
+        </div>
+
+        <div class="speed-control-box control-group-glass">
+          <i class="bi bi-speedometer2 text-indigo-400"></i>
+          <input type="range" class="speed-slider" id="viewerSpeedSlider" min="10" max="200" step="5" value="50">
+          <span class="speed-label" id="viewerSpeedLabel">50 px/s</span>
+        </div>
+
+        <button type="button" class="btn-player btn-player-primary" id="viewerAutoScrollToggleBtn" onclick="AutoViewerEngine.toggleAutoScroll()">
+          <i class="bi bi-pause-fill fs-6" id="autoScrollToggleIcon"></i> <span id="autoScrollToggleText">Pause Auto-Scroll</span>
+        </button>
+
+        <div class="control-group-glass">
+          <button type="button" class="btn-player-icon" id="zoomOutBtn" onclick="AutoViewerEngine.zoomOut()" title="Zoom Out (-)">
+            <i class="bi bi-dash-lg"></i>
+          </button>
+          <span class="zoom-percent-text" id="zoomPercentText">100%</span>
+          <button type="button" class="btn-player-icon" id="zoomInBtn" onclick="AutoViewerEngine.zoomIn()" title="Zoom In (+)">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+          <button type="button" class="btn-player-outline text-2xs py-1 px-2.5 ms-1" id="zoomFitBtn" onclick="AutoViewerEngine.zoomFit()" title="Fit Page Width">
+            <i class="bi bi-arrows-angle-expand me-1"></i>Fit
+          </button>
+        </div>
+
+        <button type="button" class="btn-player" id="fullscreenToggleBtn" onclick="AutoViewerEngine.toggleFullscreen()" title="Toggle Fullscreen">
+          <i class="bi bi-fullscreen fs-6" id="fullscreenIcon"></i>
+        </button>
+
+        <button type="button" class="btn-player btn-player-danger" id="exitViewerBtn" onclick="AutoViewerEngine.closeViewer()" title="Exit Presentation (Esc)">
+          <i class="bi bi-x-lg fs-6"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable Viewport Container -->
+    <div class="viewer-viewport" id="viewerViewport"></div>
+
+    <!-- Floating Idle Pause Badge -->
+    <div class="idle-pause-badge d-none" id="idlePauseBadge">
+      <div class="pulse-dot"></div>
+      <span id="idlePauseText">User Interaction Detected — Auto-scroll paused (Resuming in 3s...)</span>
+    </div>
+
+    <!-- Loading State Container -->
+    <div id="viewerLoadingState" class="viewer-state-box d-none">
+      <div class="spinner-border text-indigo-400 mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+      <h5 class="fw-bold text-white mb-1" id="viewerLoadingTitle">Loading PDF Document...</h5>
+      <p class="text-slate-400 text-xs mb-0" id="viewerLoadingSubtitle">Initializing PDF.js vector engine & page structures</p>
+    </div>
+
+    <!-- Error State Container -->
+    <div id="viewerErrorState" class="viewer-state-box d-none">
+      <i class="bi bi-exclamation-triangle-fill text-rose-500 mb-3" style="font-size: 3rem;"></i>
+      <h5 class="fw-bold text-white mb-1">Failed to Render PDF</h5>
+      <p class="text-slate-400 text-xs mb-3" id="viewerErrorMessage">An error occurred while fetching the PDF document stream.</p>
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn-primary-custom py-1.5 px-3 text-xs" onclick="AutoViewerEngine.retryCurrentDocument()">
+          <i class="bi bi-arrow-counterclockwise me-1"></i> Retry Loading
+        </button>
+        <button type="button" class="btn btn-outline-light btn-sm py-1.5 px-3 text-xs" onclick="AutoViewerEngine.skipDocument()">
+          <i class="bi bi-skip-end-fill me-1"></i> Skip Document
+        </button>
+      </div>
+    </div>
+
+    <!-- Presentation Completed Summary Overlay -->
+    <div id="presentationCompletedState" class="viewer-state-box d-none" style="background: radial-gradient(circle at center, #1e1b4b 0%, #090d16 100%);">
+      <div class="card border-0 text-center p-4 p-md-5 shadow-2xl" style="background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.15) !important; border-radius: var(--radius-lg); max-width: 520px; width: 90%;">
+        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle" style="width: 72px; height: 72px; background: rgba(16, 185, 129, 0.15); border: 2px solid rgba(16, 185, 129, 0.4); color: #34d399;">
+          <i class="bi bi-trophy-fill" style="font-size: 2.25rem;"></i>
+        </div>
+        <h3 class="fw-bold text-white mb-1">Presentation Completed</h3>
+        <p class="text-slate-300 text-xs mb-4">All documents in the presentation queue have completed playback.</p>
+
+        <div class="row g-3 mb-4">
+          <div class="col-4">
+            <div class="p-2.5 rounded-3 bg-white-10 border border-white-15">
+              <div class="text-xs text-slate-400 font-semibold mb-0.5">Documents</div>
+              <div class="fs-5 fw-bold text-white" id="statTotalDocs">0</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2.5 rounded-3 bg-white-10 border border-white-15">
+              <div class="text-xs text-slate-400 font-semibold mb-0.5">Cycles</div>
+              <div class="fs-5 fw-bold text-emerald-400" id="statTotalCycles">0</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2.5 rounded-3 bg-white-10 border border-white-15">
+              <div class="text-xs text-slate-400 font-semibold mb-0.5">Duration</div>
+              <div class="fs-5 fw-bold text-indigo-300" id="statTotalDuration">00:00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-center gap-2">
+          <button type="button" class="btn-primary-custom py-2 px-3.5 text-xs" onclick="AutoViewerEngine.replayPresentation()">
+            <i class="bi bi-arrow-counterclockwise me-1"></i> Replay Presentation
+          </button>
+          <button type="button" class="btn btn-outline-light btn-sm py-2 px-3.5 text-xs fw-bold" onclick="AutoViewerEngine.closeViewer()">
+            <i class="bi bi-grid-fill me-1"></i> Exit Player
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- App Scripts -->
+  <script src="js/app.js?v=1.1.0"></script>
+  <script src="js/dashboard.js?v=1.1.0"></script>
+  <script src="js/autoscroll_engine.js?v=1.1.0"></script>
+  <script src="js/autoviewer.js?v=1.1.0"></script>
+  <script src="js/presentation.js?v=1.1.0"></script>
+</body>
+
+</html>

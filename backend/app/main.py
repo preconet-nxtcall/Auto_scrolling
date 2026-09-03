@@ -75,6 +75,14 @@ def read_root():
         return FileResponse(index_path, headers=NO_CACHE_HEADERS)
     return JSONResponse({"status": "running", "app_name": settings.APP_NAME})
 
+@app.get("/presentation")
+@app.get("/presentation.html")
+def read_presentation():
+    presentation_path = FRONTEND_DIR / "presentation.html"
+    if presentation_path.exists():
+        return FileResponse(presentation_path, headers=NO_CACHE_HEADERS)
+    return JSONResponse({"detail": "Presentation page not found"}, status_code=404)
+
 @app.get("/css/{file_name:path}")
 def serve_css(file_name: str):
     css_path = FRONTEND_DIR / "css" / file_name

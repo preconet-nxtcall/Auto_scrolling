@@ -100,7 +100,8 @@ const GlobalSettingsManager = {
         if (modal) modal.hide();
       }
 
-      loadDocumentsList();
+      if (typeof loadDocumentsList === 'function') loadDocumentsList();
+      if (typeof loadPresentationPage === 'function') loadPresentationPage();
     } catch (err) {
       showToast(`Failed to save global settings: ${err.message}`, 'danger');
     }
@@ -353,6 +354,9 @@ function getFormatTileInfo(ext) {
   if (['.xlsx', '.xls', '.csv'].includes(format)) {
     return { icon: 'bi-file-earmark-excel-fill', bg: '#ecfdf5', color: '#10b981', border: '#a7f3d0' };
   }
+  if (['.html', '.htm'].includes(format)) {
+    return { icon: 'bi-filetype-html', bg: '#fff7ed', color: '#ea580c', border: '#ffedd5' };
+  }
   if (['.png', '.jpg', '.jpeg', '.webp', '.tiff', '.bmp', '.gif'].includes(format)) {
     return { icon: 'bi-file-earmark-image-fill', bg: '#f3e8ff', color: '#a855f7', border: '#e9d5ff' };
   }
@@ -366,11 +370,17 @@ function renderDocumentsTable(rawDocs) {
 
   const docs = getFilteredDocuments(rawDocs);
 
-  // Preserve currently checked document IDs across polling re-renders
-  const selectedIds = new Set(
-    Array.from(document.querySelectorAll('.doc-select-checkbox:checked'))
-      .map(cb => cb.getAttribute('data-id'))
-  );
+  // Preserve currently checked document IDs across polling re-renders, or default to all selected
+  const existingCheckboxes = document.querySelectorAll('.doc-select-checkbox');
+  let selectedIds;
+  if (existingCheckboxes.length > 0) {
+    selectedIds = new Set(
+      Array.from(document.querySelectorAll('.doc-select-checkbox:checked'))
+        .map(cb => cb.getAttribute('data-id'))
+    );
+  } else {
+    selectedIds = new Set((rawDocs || []).map(d => String(d.id)));
+  }
 
   if (!docs || docs.length === 0) {
     if (tbody) tbody.innerHTML = '';

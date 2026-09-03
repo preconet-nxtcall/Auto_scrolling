@@ -23,6 +23,8 @@ ALLOWED_MIME_TYPES = {
     ".xlsx": {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/zip", "application/x-zip-compressed"},
     ".xls": {"application/vnd.ms-excel"},
     ".csv": {"text/csv", "text/plain", "application/csv", "text/x-csv", "application/vnd.ms-excel"},
+    ".html": {"text/html", "application/xhtml+xml", "text/plain"},
+    ".htm": {"text/html", "application/xhtml+xml", "text/plain"},
     ".png": {"image/png"},
     ".jpg": {"image/jpeg", "image/pjpeg"},
     ".jpeg": {"image/jpeg", "image/pjpeg"},
@@ -126,13 +128,13 @@ def validate_file_integrity(file_bytes: bytes, ext: str) -> tuple[bool, str]:
         except Exception as e:
             return False, f"Corrupted Office archive: {str(e)}"
 
-    # Text / CSV Integrity
-    elif ext == ".csv":
+    # Text / CSV / HTML Integrity
+    elif ext in (".csv", ".html", ".htm"):
         try:
             sample = file_bytes[:1024].decode("utf-8", errors="replace")
             if "\0" in sample:
-                return False, "Binary corruption detected in CSV text file."
+                return False, f"Binary corruption detected in text file '{ext}'."
         except Exception as e:
-            return False, f"Invalid CSV file encoding: {str(e)}"
+            return False, f"Invalid file encoding for '{ext}': {str(e)}"
 
     return True, ""

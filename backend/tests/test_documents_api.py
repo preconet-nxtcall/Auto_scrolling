@@ -209,3 +209,23 @@ def test_document_settings_update():
     assert patch_alias_res.json()["scroll_speed"] == 90
 
 
+def test_html_file_upload_success():
+    html_bytes = b"<!DOCTYPE html><html><head><title>Test</title></head><body><h1>Hello World</h1></body></html>"
+    files = [
+        ("files", ("sample_page.html", html_bytes, "text/html"))
+    ]
+    response = client.post(
+        "/api/documents/upload",
+        files=files,
+        headers={"X-User-Id": "1"}
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert len(data) == 1
+    doc = data[0]
+    assert doc["original_filename"] == "sample_page.html"
+    assert doc["original_extension"] == ".html"
+
+
+
+

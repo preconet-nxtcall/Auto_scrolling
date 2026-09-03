@@ -38,7 +38,10 @@
         </div>
       </a>
 
-      <div class="d-flex align-items-center gap-3">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <a href="/presentation" class="btn-success-custom text-decoration-none">
+          <i class="bi bi-play-btn-fill fs-5"></i> Presentation Mode
+        </a>
         <button type="button" class="btn-primary-custom" onclick="document.getElementById('fileInput').click()">
           <i class="bi bi-cloud-arrow-up-fill fs-5"></i> Upload Documents
         </button>
@@ -50,7 +53,7 @@
       <!-- Hero Banner -->
       <div class="hero-banner">
         <h1 class="hero-title">Automated Document Presentation & Scrolling</h1>
-        <p class="hero-desc">Upload PDF, Word, Excel, PowerPoint, CSV, or Image files. Every document converts into PDF
+        <p class="hero-desc">Upload PDF, Word, Excel, PowerPoint, CSV, HTML, or Image files. Every document converts into PDF
           format with custom smooth scrolling, smart 3-second interaction auto-pause, repeat cycles, and playlist
           queues.</p>
       </div>
@@ -60,10 +63,10 @@
       <div class="upload-card">
         <div class="dropzone" id="uploadDropzone">
           <input type="file" id="fileInput" multiple style="display: none;"
-            accept=".pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp,.tiff,.bmp,.gif">
+            accept=".pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.csv,.html,.htm,.png,.jpg,.jpeg,.webp,.tiff,.bmp,.gif">
           <div class="dropzone-icon"><i class="bi bi-cloud-arrow-up-fill"></i></div>
           <div class="dropzone-title">Click or Drag & Drop Documents to Convert</div>
-          <div class="dropzone-sub">Upload PDF, Office files, CSV, or images for server-side PDF conversion</div>
+          <div class="dropzone-sub">Upload PDF, Office files, HTML, CSV, or images for server-side PDF conversion</div>
           
           <div class="my-3">
             <button type="button" class="btn-primary-custom py-2 px-4 text-sm" id="browseFilesBtn" onclick="document.getElementById('fileInput').click(); event.stopPropagation();">
@@ -76,6 +79,7 @@
             <span class="badge-format">DOCX / DOC</span>
             <span class="badge-format">PPTX / PPT</span>
             <span class="badge-format">XLSX / XLS / CSV</span>
+            <span class="badge-format">HTML / HTM</span>
             <span class="badge-format">PNG / JPG / WEBP</span>
           </div>
         </div>

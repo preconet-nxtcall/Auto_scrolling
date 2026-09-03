@@ -53,6 +53,8 @@ class Settings:
         ".pptx", ".ppt",
         # Office Excel & Data
         ".xlsx", ".xls", ".csv",
+        # Web & HTML Formats
+        ".html", ".htm",
         # Common Image Formats
         ".png", ".jpg", ".jpeg", ".webp", ".tiff", ".bmp", ".gif"
     }

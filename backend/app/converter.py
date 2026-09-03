@@ -118,8 +118,8 @@ def process_document_conversion(input_path: Path, output_pdf_path: Path, file_ex
     if ext in (".png", ".jpg", ".jpeg", ".webp", ".tiff"):
         return convert_image_to_pdf(input_path, output_pdf_path)
         
-    # 3. Office & CSV
-    if ext in (".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".csv"):
+    # 3. Office, CSV & HTML
+    if ext in (".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".csv", ".html", ".htm"):
         return convert_office_via_libreoffice(input_path, output_pdf_path)
         
     return False, 0, f"Unsupported file extension: {ext}"

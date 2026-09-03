@@ -435,6 +435,10 @@ class AutoScrollEngine {
       clearTimeout(this.interactionTimer);
       this.interactionTimer = null;
     }
+    if (this.interactionInterval) {
+      clearInterval(this.interactionInterval);
+      this.interactionInterval = null;
+    }
     if (this.betweenRepeatsTimer) {
       clearTimeout(this.betweenRepeatsTimer);
       this.betweenRepeatsTimer = null;
