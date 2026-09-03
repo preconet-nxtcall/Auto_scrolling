@@ -173,6 +173,34 @@ def get_document(
     doc.effective_settings = doc.get_effective_settings(current_user)
     return doc
 
+@router.patch("/documents/{document_id}", response_model=DocumentResponse, tags=["Documents"])
+@router.patch("/documents/{document_id}/settings", response_model=DocumentResponse, include_in_schema=False, tags=["Documents"])
+def update_document_settings(
+    document_id: int,
+    update_data: DocumentUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Update document auto-scroll overrides and title settings."""
+    doc = db.query(Document).filter(
+        Document.id == document_id,
+        Document.user_id == current_user.id
+    ).first()
+
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found or access denied."
+        )
+
+    for field, value in update_data.model_dump(exclude_unset=True).items():
+        setattr(doc, field, value)
+
+    db.commit()
+    db.refresh(doc)
+    doc.effective_settings = doc.get_effective_settings(current_user)
+    return doc
+
 @router.get("/documents/{document_id}/status", tags=["Documents"])
 def get_document_status(
     document_id: int,
