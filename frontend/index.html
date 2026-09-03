@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Auto-Viewer SaaS</title>
+  <meta name="description"
+    content="Production-Ready Document Auto-Viewer SaaS. Convert PDF, Word, Excel, PowerPoint, CSV, and Images to PDF with smooth auto-scrolling, interaction-aware 3s pause, customizable repeat count, and queue playback.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap 5 CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css?v=1.0.0">
+</head>
+
+<body>
+
+  <div class="app-wrapper">
+    <!-- Header -->
+    <header class="app-header">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon"><i class="bi bi-file-earmark-play-fill"></i></div>
+        <div>
+          <div class="brand-title">AutoViewer SaaS</div>
+          <div class="brand-subtitle">Document Auto-Scroll Operating System</div>
+        </div>
+      </a>
+
+      <div class="d-flex align-items-center gap-3">
+        <button type="button" class="btn-primary-custom" onclick="document.getElementById('fileInput').click()">
+          <i class="bi bi-cloud-arrow-up-fill fs-5"></i> Upload Documents
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      <!-- Hero Banner -->
+      <div class="hero-banner">
+        <h1 class="hero-title">Automated Document Presentation & Scrolling</h1>
+        <p class="hero-desc">Upload PDF, Word, Excel, PowerPoint, CSV, or Image files. Every document converts into PDF
+          format with custom smooth scrolling, smart 3-second interaction auto-pause, repeat cycles, and playlist
+          queues.</p>
+      </div>
+
+
+      <!-- File Upload Dropzone -->
+      <div class="upload-card">
+        <div class="dropzone" id="uploadDropzone">
+          <input type="file" id="fileInput" multiple style="display: none;"
+            accept=".pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp,.tiff,.bmp,.gif">
+          <div class="dropzone-icon"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+          <div class="dropzone-title">Click or Drag & Drop Documents to Convert</div>
+          <div class="dropzone-sub">Upload PDF, Office files, CSV, or images for server-side PDF conversion</div>
+          
+          <div class="my-3">
+            <button type="button" class="btn-primary-custom py-2 px-4 text-sm" id="browseFilesBtn" onclick="document.getElementById('fileInput').click(); event.stopPropagation();">
+              <i class="bi bi-folder2-open me-1"></i> Browse Files
+            </button>
+          </div>
+
+          <div class="format-badges">
+            <span class="badge-format">PDF</span>
+            <span class="badge-format">DOCX / DOC</span>
+            <span class="badge-format">PPTX / PPT</span>
+            <span class="badge-format">XLSX / XLS / CSV</span>
+            <span class="badge-format">PNG / JPG / WEBP</span>
+          </div>
+        </div>
+
+        <!-- Upload Progress Bar Container -->
+        <div id="uploadProgressContainer" class="upload-progress-box d-none mt-3">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <div class="text-xs fw-bold text-slate-800" id="uploadStatusText">Uploading files...</div>
+            <div class="text-xs fw-bold text-indigo-600" id="uploadProgressPercent">0%</div>
+          </div>
+          <div class="progress" style="height: 8px; border-radius: 999px; background-color: var(--c-slate-200);">
+            <div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-indigo-600" role="progressbar" style="width: 0%; border-radius: 999px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents Directory Section -->
+      <div class="section-panel">
+        <!-- Panel Header Top Bar -->
+        <div class="panel-header">
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div class="panel-icon-tile">
+              <i class="bi bi-folder2-open"></i>
+            </div>
+            <div>
+              <div class="d-flex align-items-center gap-2">
+                <h2 class="panel-title mb-0">Document Directory</h2>
+                <span class="doc-count-badge" id="docCountBadge">0 files</span>
+              </div>
+              <p class="panel-subtext mb-0">Manage converted documents, configure playback settings, and start auto-scrolling presentations.</p>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <button type="button" class="btn-outline-custom" onclick="GlobalSettingsManager.openModal()" title="Global Default Auto-Scroll Settings">
+              <i class="bi bi-sliders text-indigo-600 me-1"></i> Global Settings
+            </button>
+            <button type="button" class="btn-outline-custom" onclick="loadDocumentsList()" title="Refresh Playlist Queue">
+              <i class="bi bi-arrow-clockwise text-indigo-600 me-1" id="refreshIcon"></i> Refresh
+            </button>
+            <button type="button" class="btn-success-custom" onclick="playAllPlaylist()">
+              <i class="bi bi-play-circle-fill fs-6 me-1"></i> Play Presentation
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar Bar -->
+        <div class="table-toolbar">
+          <!-- Search Box Input -->
+          <div class="search-input-wrap">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" id="docSearchInput" class="search-input" placeholder="Search by title or filename..." oninput="handleDocSearch(this.value)">
+            <button type="button" class="search-clear-btn d-none" id="searchClearBtn" onclick="clearDocSearch()"><i class="bi bi-x-circle-fill"></i></button>
+          </div>
+
+          <!-- Status Filter Tabs -->
+          <div class="filter-tabs" id="filterStatusTabs">
+            <button type="button" class="filter-tab active" data-filter="all" onclick="filterDocsByStatus('all', this)">All</button>
+            <button type="button" class="filter-tab" data-filter="completed" onclick="filterDocsByStatus('completed', this)">
+              <span class="filter-dot bg-emerald-500"></span> Ready
+            </button>
+            <button type="button" class="filter-tab" data-filter="processing" onclick="filterDocsByStatus('processing', this)">
+              <span class="filter-dot bg-amber-500"></span> Converting
+            </button>
+            <button type="button" class="filter-tab" data-filter="failed" onclick="filterDocsByStatus('failed', this)">
+              <span class="filter-dot bg-rose-500"></span> Failed
+            </button>
+          </div>
+        </div>
+
+        <!-- Bulk Selection Action Toolbar -->
+        <div id="bulkActionBar" class="bulk-action-bar d-none mb-3 p-2.5 rounded-3 bg-indigo-50 border border-indigo-200 d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2 text-xs fw-bold text-indigo-900">
+            <i class="bi bi-check2-square fs-6 text-indigo-600"></i>
+            <span id="bulkSelectedCount">0 documents selected</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn-success-custom py-1 px-3 text-xs" onclick="playSelectedPlaylist()">
+              <i class="bi bi-play-fill me-1"></i> Preview Selected
+            </button>
+            <button type="button" class="btn-outline-custom py-1 px-2.5 text-xs text-rose-600" onclick="deleteSelectedDocuments()">
+              <i class="bi bi-trash-fill me-1"></i> Delete Selected
+            </button>
+          </div>
+        </div>
+
+        <!-- Documents Table Container -->
+        <div id="tableContainer" class="table-responsive shadow-sm rounded-3">
+          <table class="custom-table" aria-label="Document Directory Table">
+            <thead>
+              <tr>
+                <th style="width: 44px;" class="text-center">
+                  <input type="checkbox" id="selectAllDocs" class="form-check-input" onchange="toggleSelectAllDocs(this)">
+                </th>
+                <th>Document Details</th>
+                <th>Format</th>
+                <th>File Size</th>
+                <th>Page Count</th>
+                <th>Conversion Status</th>
+                <th>Date Uploaded</th>
+                <th class="text-end" style="width: 170px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="documentsTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state d-none" id="emptyState">
+          <div class="empty-icon"><i class="bi bi-file-earmark-arrow-up"></i></div>
+          <h5 class="fw-bold text-slate-800 mb-1">No Documents Uploaded Yet</h5>
+          <p class="text-slate-500 text-xs mb-3">Upload PDF, Word, Excel, PowerPoint, CSV, or Image files to start automatic scrolling playback.</p>
+          <button type="button" class="btn-primary-custom py-2 px-4 text-xs" onclick="document.getElementById('fileInput').click()">
+            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Upload Your First Document
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Global Settings Modal -->
+  <div class="modal fade" id="globalSettingsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content" style="border-radius: var(--radius-lg);">
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title fw-bold text-slate-900">
+            <i class="bi bi-gear-fill text-indigo-600 me-2"></i>Global Default Auto-Scroll Settings
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-info py-2 px-3 text-xs mb-4">
+            <i class="bi bi-info-circle-fill me-1.5"></i>
+            These global settings serve as default parameters for all documents unless custom per-document overrides are specified.
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label text-xs fw-bold text-slate-700">1. Scroll Speed (px/sec)</label>
+              <input type="number" class="form-control" id="globalScrollSpeed" min="10" max="500" value="50">
+              <div class="form-text text-3xs text-slate-500">Range: 10 - 500 pixels/second. Default: 50</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-xs fw-bold text-slate-700">2. Repeat Count (cycles)</label>
+              <input type="number" class="form-control" id="globalRepeatCount" min="1" max="50" value="3">
+              <div class="form-text text-3xs text-slate-500">Range: 1 - 50 cycles. Default: 3</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-xs fw-bold text-slate-700">3. Interaction Pause Duration (seconds)</label>
+              <input type="number" class="form-control" id="globalInteractionPause" min="0.5" max="30" step="0.5" value="3">
+              <div class="form-text text-3xs text-slate-500">Inactivity pause after user mouse/touch. Default: 3 sec</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-xs fw-bold text-slate-700">4. Start Delay (seconds)</label>
+              <input type="number" class="form-control" id="globalStartDelay" min="0" max="10" step="0.5" value="2">
+              <div class="form-text text-3xs text-slate-500">Initial delay before scrolling begins. Default: 2 sec</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-xs fw-bold text-slate-700">5. Delay Between Repeat Cycles (seconds)</label>
+              <input type="number" class="form-control" id="globalBetweenRepeatsDelay" min="0" max="10" step="0.5" value="1">
+              <div class="form-text text-3xs text-slate-500">Pause at top between repeat cycles. Default: 1 sec</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-xs fw-bold text-slate-700">6. Delay Before Next Document (seconds)</label>
+              <input type="number" class="form-control" id="globalBetweenDocumentsDelay" min="0" max="10" step="0.5" value="2">
+              <div class="form-text text-3xs text-slate-500">Playlist delay before loading next document. Default: 2 sec</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-light btn-sm fw-bold" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn-primary-custom py-1.5 px-3.5 text-xs" onclick="GlobalSettingsManager.saveSettings()">
+            <i class="bi bi-check-lg me-1"></i> Save Global Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Document Settings Edit Modal -->
+  <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content" style="border-radius: var(--radius-lg);">
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title fw-bold text-slate-900">
+            <i class="bi bi-sliders text-indigo-600 me-2"></i>Configure Document Auto-Scroll Overrides
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label text-xs fw-bold text-slate-700">Document Title</label>
+            <input type="text" class="form-control" id="editDocTitle">
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <label class="form-label text-xs fw-bold text-slate-700 mb-0">1. Scroll Speed (px/sec)</label>
+                <div class="form-check text-xs">
+                  <input class="form-check-input" type="checkbox" id="docUseGlobal_speed" onchange="DocumentSettingsManager.toggleGlobal('speed')">
+                  <label class="form-check-label text-slate-600" for="docUseGlobal_speed">Use Global</label>
+                </div>
+              </div>
+              <input type="number" class="form-control" id="editDoc_speed" min="10" max="500">
+              <div class="form-text text-3xs text-slate-500" id="editDoc_speed_inherited"></div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <label class="form-label text-xs fw-bold text-slate-700 mb-0">2. Repeat Count (cycles)</label>
+                <div class="form-check text-xs">
+                  <input class="form-check-input" type="checkbox" id="docUseGlobal_repeat" onchange="DocumentSettingsManager.toggleGlobal('repeat')">
+                  <label class="form-check-label text-slate-600" for="docUseGlobal_repeat">Use Global</label>
+                </div>
+              </div>
+              <input type="number" class="form-control" id="editDoc_repeat" min="1" max="50">
+              <div class="form-text text-3xs text-slate-500" id="editDoc_repeat_inherited"></div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <label class="form-label text-xs fw-bold text-slate-700 mb-0">3. Interaction Pause (sec)</label>
+                <div class="form-check text-xs">
+                  <input class="form-check-input" type="checkbox" id="docUseGlobal_pause" onchange="DocumentSettingsManager.toggleGlobal('pause')">
+                  <label class="form-check-label text-slate-600" for="docUseGlobal_pause">Use Global</label>
+                </div>
+              </div>
+              <input type="number" class="form-control" id="editDoc_pause" min="0.5" max="30" step="0.5">
+              <div class="form-text text-3xs text-slate-500" id="editDoc_pause_inherited"></div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <label class="form-label text-xs fw-bold text-slate-700 mb-0">4. Start Delay (sec)</label>
+                <div class="form-check text-xs">
+                  <input class="form-check-input" type="checkbox" id="docUseGlobal_start" onchange="DocumentSettingsManager.toggleGlobal('start')">
+                  <label class="form-check-label text-slate-600" for="docUseGlobal_start">Use Global</label>
+                </div>
+              </div>
+              <input type="number" class="form-control" id="editDoc_start" min="0" max="10" step="0.5">
+              <div class="form-text text-3xs text-slate-500" id="editDoc_start_inherited"></div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <label class="form-label text-xs fw-bold text-slate-700 mb-0">5. Delay Between Repeats (sec)</label>
+                <div class="form-check text-xs">
+                  <input class="form-check-input" type="checkbox" id="docUseGlobal_between_rep" onchange="DocumentSettingsManager.toggleGlobal('between_rep')">
+                  <label class="form-check-label text-slate-600" for="docUseGlobal_between_rep">Use Global</label>
+                </div>
+              </div>
+              <input type="number" class="form-control" id="editDoc_between_rep" min="0" max="10" step="0.5">
+              <div class="form-text text-3xs text-slate-500" id="editDoc_between_rep_inherited"></div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <label class="form-label text-xs fw-bold text-slate-700 mb-0">6. Delay Before Next Doc (sec)</label>
+                <div class="form-check text-xs">
+                  <input class="form-check-input" type="checkbox" id="docUseGlobal_between_doc" onchange="DocumentSettingsManager.toggleGlobal('between_doc')">
+                  <label class="form-check-label text-slate-600" for="docUseGlobal_between_doc">Use Global</label>
+                </div>
+              </div>
+              <input type="number" class="form-control" id="editDoc_between_doc" min="0" max="10" step="0.5">
+              <div class="form-text text-3xs text-slate-500" id="editDoc_between_doc_inherited"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-light btn-sm fw-bold" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn-primary-custom py-1.5 px-3.5 text-xs" onclick="DocumentSettingsManager.saveDocSettings()">
+            <i class="bi bi-check-lg me-1"></i> Save Document Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <!-- FULLSCREEN PDF AUTO-VIEWER OVERLAY                                -->
+  <!-- ═════════════════════════════════════════════════════════════════ -->
+  <div id="viewerOverlay" class="d-none">
+    <!-- Minimal Overlay Header Bar (Auto-hides after 3s inactivity) -->
+    <div class="viewer-header" id="viewerHeader">
+      <div class="viewer-doc-info">
+        <div class="brand-icon shadow-sm" style="width:36px;height:36px;font-size:1rem;flex-shrink:0;background:linear-gradient(135deg, var(--c-primary-500), var(--c-primary-700));">
+          <i class="bi bi-file-earmark-pdf-fill"></i>
+        </div>
+        <div class="d-flex flex-column justify-content-center min-w-0">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="viewer-doc-title" id="viewerDocTitle" title="Document Title">Loading Document...</div>
+            <span class="viewer-pill viewer-pill-queue" id="viewerQueueProgressText">Doc 1 of 1</span>
+            <span class="viewer-pill viewer-pill-page" id="viewerPageProgressText">Page 1 of --</span>
+            <span class="viewer-pill viewer-pill-cycle" id="viewerCycleText">Cycle 1 of 3</span>
+            <span class="d-none" id="viewerDocSub"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="viewer-controls">
+        <!-- Presentation Queue Navigation (Prev / Next) -->
+        <div class="control-group-glass">
+          <button type="button" class="btn-player-icon" id="prevDocBtn" onclick="AutoViewerEngine.prevDocument()" title="Previous Document">
+            <i class="bi bi-skip-backward-fill"></i>
+          </button>
+          <button type="button" class="btn-player-icon" id="nextDocBtn" onclick="AutoViewerEngine.nextDocument()" title="Next Document">
+            <i class="bi bi-skip-forward-fill"></i>
+          </button>
+        </div>
+
+        <!-- Auto-Scroll Speed Control -->
+        <div class="speed-control-box control-group-glass">
+          <i class="bi bi-speedometer2 text-indigo-400"></i>
+          <input type="range" class="speed-slider" id="viewerSpeedSlider" min="10" max="200" step="5" value="50">
+          <span class="speed-label" id="viewerSpeedLabel">50 px/s</span>
+        </div>
+
+        <button type="button" class="btn-player btn-player-primary" id="viewerAutoScrollToggleBtn" onclick="AutoViewerEngine.toggleAutoScroll()">
+          <i class="bi bi-pause-fill fs-6" id="autoScrollToggleIcon"></i> <span id="autoScrollToggleText">Pause Auto-Scroll</span>
+        </button>
+
+        <!-- Zoom Controls -->
+        <div class="control-group-glass">
+          <button type="button" class="btn-player-icon" id="zoomOutBtn" onclick="AutoViewerEngine.zoomOut()" title="Zoom Out (-)">
+            <i class="bi bi-dash-lg"></i>
+          </button>
+          <span class="zoom-percent-text" id="zoomPercentText">100%</span>
+          <button type="button" class="btn-player-icon" id="zoomInBtn" onclick="AutoViewerEngine.zoomIn()" title="Zoom In (+)">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+          <button type="button" class="btn-player-outline text-2xs py-1 px-2.5 ms-1" id="zoomFitBtn" onclick="AutoViewerEngine.zoomFit()" title="Fit Page Width">
+            <i class="bi bi-arrows-angle-expand me-1"></i>Fit
+          </button>
+        </div>
+
+        <!-- Fullscreen Toggle -->
+        <button type="button" class="btn-player" id="fullscreenToggleBtn" onclick="AutoViewerEngine.toggleFullscreen()" title="Toggle Fullscreen">
+          <i class="bi bi-fullscreen fs-6" id="fullscreenIcon"></i>
+        </button>
+
+        <!-- Exit Viewer -->
+        <button type="button" class="btn-player btn-player-danger" id="exitViewerBtn" onclick="AutoViewerEngine.closeViewer()" title="Exit Presentation (Esc)">
+          <i class="bi bi-x-lg fs-6"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Dedicated Scrollable Viewport Container -->
+    <div class="viewer-viewport" id="viewerViewport">
+      <!-- PDF.js virtualized page wrappers rendered dynamically -->
+    </div>
+
+    <!-- Floating Idle Interaction Pause Badge -->
+    <div class="idle-pause-badge d-none" id="idlePauseBadge">
+      <div class="pulse-dot"></div>
+      <span>User Interaction Detected — Auto-scroll paused (Resuming in 3s...)</span>
+    </div>
+
+    <!-- Loading State Container -->
+    <div id="viewerLoadingState" class="viewer-state-box d-none">
+      <div class="spinner-border text-indigo-400 mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+      <h5 class="fw-bold text-white mb-1" id="viewerLoadingTitle">Loading PDF Document...</h5>
+      <p class="text-slate-400 text-xs mb-0" id="viewerLoadingSubtitle">Initializing PDF.js vector engine & page structures</p>
+    </div>
+
+    <!-- Error State Container -->
+    <div id="viewerErrorState" class="viewer-state-box d-none">
+      <i class="bi bi-exclamation-triangle-fill text-rose-500 mb-3" style="font-size: 3rem;"></i>
+      <h5 class="fw-bold text-white mb-1">Failed to Render PDF</h5>
+      <p class="text-slate-400 text-xs mb-3" id="viewerErrorMessage">An error occurred while fetching the PDF document stream.</p>
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn-primary-custom py-1.5 px-3 text-xs" onclick="AutoViewerEngine.retryCurrentDocument()">
+          <i class="bi bi-arrow-counterclockwise me-1"></i> Retry Loading
+        </button>
+        <button type="button" class="btn btn-outline-light btn-sm py-1.5 px-3 text-xs" onclick="AutoViewerEngine.skipDocument()">
+          <i class="bi bi-skip-end-fill me-1"></i> Skip Document
+        </button>
+      </div>
+    </div>
+
+    <!-- Presentation Completed Summary Overlay Screen -->
+    <div id="presentationCompletedState" class="viewer-state-box d-none" style="background: radial-gradient(circle at center, #1e1b4b 0%, #090d16 100%);">
+      <div class="card border-0 text-center p-4 p-md-5 shadow-2xl" style="background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.15) !important; border-radius: var(--radius-lg); max-width: 520px; width: 90%;">
+        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle" style="width: 72px; height: 72px; background: rgba(16, 185, 129, 0.15); border: 2px solid rgba(16, 185, 129, 0.4); color: #34d399;">
+          <i class="bi bi-trophy-fill" style="font-size: 2.25rem;"></i>
+        </div>
+        <h3 class="fw-bold text-white mb-1">Presentation Completed</h3>
+        <p class="text-slate-300 text-xs mb-4">All documents in the presentation queue have completed playback.</p>
+
+        <div class="row g-3 mb-4">
+          <div class="col-4">
+            <div class="p-2.5 rounded-3 bg-white-10 border border-white-15">
+              <div class="text-xs text-slate-400 font-semibold mb-0.5">Documents</div>
+              <div class="fs-5 fw-bold text-white" id="statTotalDocs">0</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2.5 rounded-3 bg-white-10 border border-white-15">
+              <div class="text-xs text-slate-400 font-semibold mb-0.5">Cycles</div>
+              <div class="fs-5 fw-bold text-emerald-400" id="statTotalCycles">0</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2.5 rounded-3 bg-white-10 border border-white-15">
+              <div class="text-xs text-slate-400 font-semibold mb-0.5">Duration</div>
+              <div class="fs-5 fw-bold text-indigo-300" id="statTotalDuration">00:00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-center gap-2">
+          <button type="button" class="btn-primary-custom py-2 px-3.5 text-xs" onclick="AutoViewerEngine.replayPresentation()">
+            <i class="bi bi-arrow-counterclockwise me-1"></i> Replay Presentation
+          </button>
+          <button type="button" class="btn btn-outline-light btn-sm py-2 px-3.5 text-xs fw-bold" onclick="AutoViewerEngine.closeViewer()">
+            <i class="bi bi-grid-fill me-1"></i> Back to Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/button.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- App Scripts -->
+  <script src="js/app.js?v=1.0.0"></script>
+  <script src="js/dashboard.js?v=1.0.0"></script>
+  <script src="js/autoscroll_engine.js?v=1.0.0"></script>
+  <script src="js/autoviewer.js?v=1.0.0"></script>
+</body>
+
+</html>

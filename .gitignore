@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Database
+autoscroll.db
+
+# Storage / Temp files
+backend/storage/uploads/*
+!backend/storage/uploads/.gitkeep
+backend/storage/converted/*
+!backend/storage/converted/.gitkeep
+backend/storage/temp/*
+!backend/storage/temp/.gitkeep
+
+# Pytest / IDE
+.pytest_cache/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
