@@ -18,7 +18,7 @@ else:
     load_dotenv()
 
 class Settings:
-    APP_NAME: str = os.getenv("APP_NAME", "Document Auto-Viewer SaaS")
+    APP_NAME: str = os.getenv("APP_NAME", "Auto-Scroll Pro - Document Presentation Platform")
     BASE_DIR: Path = BASE_DIR
     DEBUG: bool = os.getenv("DEBUG", "True").lower() in ("true", "1", "t")
     API_V1_STR: str = os.getenv("API_V1_STR", "/api")
