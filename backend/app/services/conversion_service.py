@@ -225,9 +225,17 @@ def execute_conversion_job(document_id: int):
         if not temp_original_path.exists():
             temp_original_path = Path(doc.original_file_path)
 
+        if not temp_original_path.exists() and doc.original_file_data:
+            try:
+                temp_original_path = settings.TEMP_DIR / Path(doc.original_file_path).name
+                with open(temp_original_path, "wb") as f:
+                    f.write(doc.original_file_data)
+            except Exception as restore_err:
+                logger.warning(f"[Conversion Worker] Could not restore original file from DB: {restore_err}")
+
         if not temp_original_path.exists():
             doc.conversion_status = "failed"
-            doc.conversion_error = "Source input file missing from disk."
+            doc.conversion_error = "Source input file missing from disk and database."
             db.commit()
             return
 
@@ -246,8 +254,11 @@ def execute_conversion_job(document_id: int):
             doc.conversion_status = "completed"
             doc.page_count = pages
             doc.pdf_file_path = str(output_pdf_path)
+            if output_pdf_path.exists():
+                with open(output_pdf_path, "rb") as pdf_f:
+                    doc.pdf_file_data = pdf_f.read()
             doc.conversion_error = None
-            logger.info(f"[Conversion Worker] Successfully completed Document #{doc.id} ({pages} pages).")
+            logger.info(f"[Conversion Worker] Successfully completed Document #{doc.id} ({pages} pages). PDF binary stored in database.")
         else:
             doc.conversion_status = "failed"
             doc.conversion_error = err_msg

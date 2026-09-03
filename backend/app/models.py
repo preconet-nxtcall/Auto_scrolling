@@ -1,6 +1,5 @@
-from datetime import datetime
 from sqlalchemy import (
-    Column, Integer, String, BigInteger, Text, DateTime, ForeignKey, Boolean, func
+    Column, Integer, String, BigInteger, Text, DateTime, ForeignKey, Boolean, LargeBinary, func
 )
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -40,6 +39,10 @@ class Document(Base):
     original_file_size = Column(BigInteger, nullable=False)
     original_file_path = Column(String(500), nullable=False)
     
+    # Database Binary Storage (Stores file data directly inside database)
+    original_file_data = Column(LargeBinary, nullable=True)
+    pdf_file_data = Column(LargeBinary, nullable=True)
+
     pdf_file_path = Column(String(500), nullable=True)
     conversion_status = Column(String(50), default="uploaded", index=True)  # uploaded, processing, completed, failed
     conversion_error = Column(Text, nullable=True)

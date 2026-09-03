@@ -109,7 +109,7 @@ async def upload_documents(
         with open(temp_file_path, "wb") as f:
             f.write(contents)
 
-        # Create Database Record bound to current_user.id with status "uploaded"
+        # Create Database Record bound to current_user.id with status "uploaded" and database binary data
         doc = Document(
             user_id=current_user.id,
             title=stem,
@@ -118,6 +118,7 @@ async def upload_documents(
             original_mime_type=mime_type,
             original_file_size=file_size,
             original_file_path=str(original_file_path),
+            original_file_data=contents,
             pdf_file_path=str(converted_pdf_path),
             scroll_speed=scroll_speed,
             repeat_count=repeat_count,
@@ -254,28 +255,42 @@ def stream_pdf(
             detail="Document not found or access denied."
         )
 
-    if doc.conversion_status != "completed" or not doc.pdf_file_path:
+    if doc.conversion_status != "completed":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Document is not ready for viewing. Status: {doc.conversion_status}. Error: {doc.conversion_error}"
         )
 
-    pdf_file = Path(doc.pdf_file_path)
-    if not pdf_file.exists():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Converted PDF file missing from disk."
+    # 1. Prefer database binary blob stream if available
+    if doc.pdf_file_data:
+        from fastapi.responses import Response
+        return Response(
+            content=doc.pdf_file_data,
+            media_type="application/pdf",
+            headers={
+                "Accept-Ranges": "bytes",
+                "Access-Control-Allow-Origin": "*",
+                "Content-Disposition": f'inline; filename="{doc.title}.pdf"'
+            }
         )
 
-    return FileResponse(
-        path=pdf_file,
-        media_type="application/pdf",
-        filename=f"{doc.title}.pdf",
-        headers={
-            "Accept-Ranges": "bytes",
-            "Access-Control-Allow-Origin": "*",
-            "Content-Disposition": f"inline; filename=\"{doc.title}.pdf\""
-        }
+    # 2. Fallback to disk file if present
+    if doc.pdf_file_path:
+        pdf_file = Path(doc.pdf_file_path)
+        if pdf_file.exists():
+            return FileResponse(
+                path=str(pdf_file),
+                media_type="application/pdf",
+                filename=f"{doc.title}.pdf",
+                headers={
+                    "Accept-Ranges": "bytes",
+                    "Access-Control-Allow-Origin": "*"
+                }
+            )
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Converted PDF file data missing."
     )
 
 @router.delete("/documents/{document_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Documents"])
