@@ -15,11 +15,16 @@ function escapeHtml(text) {
 }
 window.escapeHtml = escapeHtml;
 
-// Date Formatter Utility
+// Date Formatter Utility (Converts server UTC timestamps to user local browser timezone)
 function formatDate(dateStr) {
   if (!dateStr) return '--';
   try {
-    const d = new Date(dateStr);
+    let str = String(dateStr).trim();
+    // If ISO date string has no explicit timezone offset (e.g. "2026-09-03T11:47:00"), append 'Z' for UTC
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?$/.test(str)) {
+      str += 'Z';
+    }
+    const d = new Date(str);
     if (isNaN(d.getTime())) return dateStr;
     return d.toLocaleDateString(undefined, {
       month: 'short',
