@@ -198,3 +198,22 @@ def test_retry_conversion_endpoint():
     )
 
 
+def test_upload_and_convert_html():
+    html_bytes = b"<!DOCTYPE html><html><head><title>Test</title></head><body><h1>Hello HTML</h1><p>Sample presentation content.</p></body></html>"
+    files = [("files", ("page.html", html_bytes, "text/html"))]
+    res = client.post(
+        "/api/documents/upload", files=files, headers={"X-User-Id": "1"}
+    )
+    assert res.status_code == 201
+    doc_id = res.json()[0]["id"]
+    assert res.json()[0]["original_extension"] == ".html"
+
+    status_res = client.get(
+        f"/api/documents/{doc_id}/status", headers={"X-User-Id": "1"}
+    )
+    assert status_res.status_code == 200
+    assert status_res.json()["conversion_status"] == "completed"
+    assert status_res.json()["page_count"] >= 1
+
+
+
