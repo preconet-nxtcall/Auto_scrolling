@@ -264,12 +264,41 @@ class AutoScrollEngine {
     const previousState = this.state;
     this.setState(AutoScrollState.PAUSED_BY_USER);
 
+    if (this.interactionInterval) {
+      clearInterval(this.interactionInterval);
+      this.interactionInterval = null;
+    }
     if (this.interactionTimer) {
       clearTimeout(this.interactionTimer);
+      this.interactionTimer = null;
     }
+
+    const totalMs = this.config.interactionPause || 3000;
+    let remainingSec = Math.max(1, Math.ceil(totalMs / 1000));
+
+    if (typeof this.onInteractionCountdown === 'function') {
+      try { this.onInteractionCountdown(remainingSec); } catch (e) {}
+    }
+
+    this.interactionInterval = setInterval(() => {
+      remainingSec--;
+      if (remainingSec >= 0) {
+        if (typeof this.onInteractionCountdown === 'function') {
+          try { this.onInteractionCountdown(remainingSec); } catch (e) {}
+        }
+      }
+      if (remainingSec <= 0) {
+        clearInterval(this.interactionInterval);
+        this.interactionInterval = null;
+      }
+    }, 1000);
 
     // Resume after interactionPause milliseconds of inactivity
     this.interactionTimer = setTimeout(() => {
+      if (this.interactionInterval) {
+        clearInterval(this.interactionInterval);
+        this.interactionInterval = null;
+      }
       if (this.state === AutoScrollState.PAUSED_BY_USER) {
         if (previousState === AutoScrollState.BETWEEN_REPEATS) {
           this.startScrollingLoop();
@@ -277,7 +306,7 @@ class AutoScrollEngine {
           this.resumeFromInteraction();
         }
       }
-    }, this.config.interactionPause);
+    }, totalMs);
   }
 
   resumeFromInteraction() {
@@ -294,7 +323,14 @@ class AutoScrollEngine {
   pause() {
     if (this.state === AutoScrollState.SCROLLING || this.state === AutoScrollState.STARTING) {
       this.cancelAnimationFrame();
-      this.clearAllTimers();
+      if (this.interactionInterval) {
+        clearInterval(this.interactionInterval);
+        this.interactionInterval = null;
+      }
+      if (this.interactionTimer) {
+        clearTimeout(this.interactionTimer);
+        this.interactionTimer = null;
+      }
       this.setState(AutoScrollState.PAUSED_BY_USER);
     }
   }
@@ -304,6 +340,10 @@ class AutoScrollEngine {
       if (this.interactionTimer) {
         clearTimeout(this.interactionTimer);
         this.interactionTimer = null;
+      }
+      if (this.interactionInterval) {
+        clearInterval(this.interactionInterval);
+        this.interactionInterval = null;
       }
       const maxScroll = this.container ? (this.container.scrollHeight - this.container.clientHeight) : 0;
       if (maxScroll <= 10) {

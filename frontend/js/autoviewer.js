@@ -62,6 +62,14 @@ const AutoViewerEngine = {
       }
     };
 
+    this.scrollEngine.onInteractionCountdown = (remainingSec) => {
+      const textEl = document.getElementById('idlePauseText');
+      if (textEl) {
+        const secDisplay = remainingSec > 0 ? `${remainingSec}s` : '0s';
+        textEl.textContent = `User Interaction Detected — Auto-scroll paused (Resuming in ${secDisplay}...)`;
+      }
+    };
+
     this.scrollEngine.onCycleComplete = (currentCycle, repeatCount) => {
       this.presentationStats.totalCyclesCompleted++;
       const cycleEl = document.getElementById('viewerCycleText');
