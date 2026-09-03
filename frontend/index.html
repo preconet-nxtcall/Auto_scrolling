@@ -185,14 +185,27 @@
           </table>
         </div>
 
-        <!-- Empty State -->
+        <!-- Empty State Card -->
         <div class="empty-state d-none" id="emptyState">
-          <div class="empty-icon"><i class="bi bi-file-earmark-arrow-up"></i></div>
-          <h5 class="fw-bold text-slate-800 mb-1">No Documents Uploaded Yet</h5>
-          <p class="text-slate-500 text-xs mb-3">Upload PDF, Word, Excel, PowerPoint, CSV, or Image files to start automatic scrolling playback.</p>
-          <button type="button" class="btn-primary-custom py-2 px-4 text-xs" onclick="document.getElementById('fileInput').click()">
-            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Upload Your First Document
-          </button>
+          <div class="empty-state-card">
+            <div class="empty-icon-box mb-3">
+              <i class="bi bi-cloud-arrow-up-fill"></i>
+            </div>
+            <h4 class="empty-title mb-2">No Documents Uploaded Yet</h4>
+            <p class="empty-subtitle mb-3">Upload PDF, Word, Excel, PowerPoint, CSV, or Image files to start automatic scrolling playback.</p>
+            
+            <div class="supported-formats-pills mb-4">
+              <span class="format-pill format-pdf"><i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF</span>
+              <span class="format-pill format-word"><i class="bi bi-file-earmark-word-fill me-1"></i> Word</span>
+              <span class="format-pill format-ppt"><i class="bi bi-file-earmark-ppt-fill me-1"></i> PowerPoint</span>
+              <span class="format-pill format-excel"><i class="bi bi-file-earmark-excel-fill me-1"></i> Excel / CSV</span>
+              <span class="format-pill format-image"><i class="bi bi-file-earmark-image-fill me-1"></i> Images</span>
+            </div>
+
+            <button type="button" class="btn-primary-custom py-2.5 px-4 text-sm shadow-md" onclick="document.getElementById('fileInput').click()">
+              <i class="bi bi-cloud-arrow-up-fill me-2 fs-5"></i> Upload Your First Document
+            </button>
+          </div>
         </div>
       </div>
     </main>
