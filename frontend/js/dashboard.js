@@ -365,6 +365,8 @@ function getFormatTileInfo(ext) {
 
 function renderDocumentsTable(rawDocs) {
   const tbody = document.getElementById('documentsTableBody');
+  if (!tbody) return;
+
   const emptyState = document.getElementById('emptyState');
   const tableContainer = document.getElementById('tableContainer');
 
@@ -705,6 +707,10 @@ function playSelectedPlaylist() {
 window.playSelectedPlaylist = playSelectedPlaylist;
 
 document.addEventListener('DOMContentLoaded', () => {
-  setupUploadDropzone();
-  loadDocumentsList();
+  if (document.getElementById('uploadDropzone') || document.getElementById('browseFilesBtn')) {
+    setupUploadDropzone();
+  }
+  if (document.getElementById('documentsTableBody')) {
+    loadDocumentsList();
+  }
 });
